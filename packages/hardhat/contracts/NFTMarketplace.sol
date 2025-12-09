@@ -2,10 +2,11 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NFTMarketplace is ReentrancyGuard, Ownable {
+contract NFTMarketplace is ReentrancyGuard, Ownable, IERC721Receiver {
     struct Listing {
         uint256 tokenId;
         address nftContract;
@@ -347,5 +348,201 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         address to
     ) external onlyOwner {
         IERC721(nftContract).safeTransferFrom(address(this), to, tokenId);
+    }
+
+    // Support receiving ERC721 tokens via safeTransferFrom
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure override returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
+    }
+
+    // =====================
+    // Blind Auction Feature
+    // =====================
+
+    struct BlindAuction {
+        uint256 auctionId;
+        uint256 tokenId;
+        address nftContract;
+        address seller;
+        uint256 minBid;
+        uint256 commitEnd;
+        uint256 revealEnd;
+        bool finalized;
+        address highestBidder;
+        uint256 highestBid;
+    }
+
+    // Auctions by ID
+    mapping(uint256 => BlindAuction) public blindAuctions;
+    uint256 public nextAuctionId = 1;
+
+    // Commitments: auctionId => bidder => commitment hash
+    mapping(uint256 => mapping(address => bytes32)) public bidCommitments;
+    // Revealed amounts: auctionId => bidder => amount
+    mapping(uint256 => mapping(address => uint256)) public revealedAmounts;
+    // Track participants for refund iteration
+    mapping(uint256 => address[]) public auctionBidders;
+
+    event BlindAuctionCreated(
+        uint256 indexed auctionId,
+        address indexed nftContract,
+        uint256 indexed tokenId,
+        address seller,
+        uint256 minBid,
+        uint256 commitEnd,
+        uint256 revealEnd
+    );
+    event BlindBidCommitted(uint256 indexed auctionId, address indexed bidder, bytes32 commitment);
+    event BlindBidRevealed(uint256 indexed auctionId, address indexed bidder, uint256 amount);
+    event BlindAuctionFinalized(uint256 indexed auctionId, address winner, uint256 amount);
+
+    /**
+     * @dev Create a blind auction for an NFT. NFT is escrowed into the marketplace until finalized.
+     */
+    function createBlindAuction(
+        address nftContract,
+        uint256 tokenId,
+        uint256 minBid,
+        uint256 commitDuration,
+        uint256 revealDuration
+    ) external nonReentrant {
+        require(minBid > 0, "Min bid must be > 0");
+        require(commitDuration > 0 && revealDuration > 0, "Invalid durations");
+        IERC721 nft = IERC721(nftContract);
+        require(nft.ownerOf(tokenId) == msg.sender, "You don't own this NFT");
+        require(
+            nft.isApprovedForAll(msg.sender, address(this)) ||
+            nft.getApproved(tokenId) == address(this),
+            "Marketplace not approved"
+        );
+
+        uint256 auctionId = nextAuctionId++;
+
+        // Escrow NFT into marketplace to guarantee delivery
+        nft.safeTransferFrom(msg.sender, address(this), tokenId);
+
+        uint256 commitEnd = block.timestamp + commitDuration;
+        uint256 revealEnd = commitEnd + revealDuration;
+
+        blindAuctions[auctionId] = BlindAuction({
+            auctionId: auctionId,
+            tokenId: tokenId,
+            nftContract: nftContract,
+            seller: msg.sender,
+            minBid: minBid,
+            commitEnd: commitEnd,
+            revealEnd: revealEnd,
+            finalized: false,
+            highestBidder: address(0),
+            highestBid: 0
+        });
+
+        emit BlindAuctionCreated(auctionId, nftContract, tokenId, msg.sender, minBid, commitEnd, revealEnd);
+    }
+
+    /**
+     * @dev Commit a bid using a hash of (amount, secret, bidder).
+     */
+    function commitBlindBid(uint256 auctionId, bytes32 commitment) external {
+        BlindAuction storage a = blindAuctions[auctionId];
+        require(a.seller != address(0), "Auction not found");
+        require(block.timestamp < a.commitEnd, "Commit phase ended");
+        require(bidCommitments[auctionId][msg.sender] == bytes32(0), "Already committed");
+
+        bidCommitments[auctionId][msg.sender] = commitment;
+        auctionBidders[auctionId].push(msg.sender);
+        emit BlindBidCommitted(auctionId, msg.sender, commitment);
+    }
+
+    /**
+     * @dev Reveal a bid by providing amount and secret. ETH equal to amount is sent.
+     */
+    function revealBlindBid(uint256 auctionId, uint256 amount, bytes32 secret) external payable nonReentrant {
+        BlindAuction storage a = blindAuctions[auctionId];
+        require(a.seller != address(0), "Auction not found");
+        require(block.timestamp >= a.commitEnd && block.timestamp < a.revealEnd, "Not in reveal phase");
+        require(bidCommitments[auctionId][msg.sender] != bytes32(0), "No commitment");
+        require(revealedAmounts[auctionId][msg.sender] == 0, "Already revealed");
+        require(amount >= a.minBid, "Bid below minimum");
+        require(msg.value == amount, "Incorrect ETH sent");
+
+        bytes32 expected = keccak256(abi.encode(amount, secret, msg.sender));
+        require(expected == bidCommitments[auctionId][msg.sender], "Commitment mismatch");
+
+        revealedAmounts[auctionId][msg.sender] = amount;
+
+        if (amount > a.highestBid) {
+            a.highestBid = amount;
+            a.highestBidder = msg.sender;
+        }
+
+        emit BlindBidRevealed(auctionId, msg.sender, amount);
+    }
+
+    /**
+     * @dev Finalize the auction: transfer NFT and handle payouts & refunds.
+     */
+    function finalizeBlindAuction(uint256 auctionId) external nonReentrant {
+        BlindAuction storage a = blindAuctions[auctionId];
+        require(a.seller != address(0), "Auction not found");
+        require(block.timestamp >= a.revealEnd, "Reveal phase not ended");
+        require(!a.finalized, "Already finalized");
+        require(msg.sender == a.seller || msg.sender == owner(), "Only seller or owner");
+
+        IERC721 nft = IERC721(a.nftContract);
+
+        if (a.highestBidder != address(0)) {
+            // Payout seller minus marketplace fee
+            uint256 fee = (a.highestBid * marketplaceFee) / 10000;
+            uint256 sellerAmount = a.highestBid - fee;
+
+            // Transfer NFT to winner
+            nft.safeTransferFrom(address(this), a.highestBidder, a.tokenId);
+
+            // Pay seller
+            (bool paid, ) = payable(a.seller).call{value: sellerAmount}("");
+            require(paid, "Seller payout failed");
+        } else {
+            // No valid bids; return NFT to seller
+            nft.safeTransferFrom(address(this), a.seller, a.tokenId);
+        }
+
+        // Refund losing bidders
+        address winner = a.highestBidder;
+        address[] memory bidders = auctionBidders[auctionId];
+        for (uint256 i = 0; i < bidders.length; i++) {
+            address b = bidders[i];
+            uint256 amt = revealedAmounts[auctionId][b];
+            if (amt > 0 && b != winner) {
+                (bool refunded, ) = payable(b).call{value: amt}("");
+                require(refunded, "Refund failed");
+            }
+        }
+
+        a.finalized = true;
+        emit BlindAuctionFinalized(auctionId, a.highestBidder, a.highestBid);
+    }
+
+    function getAllActiveBlindAuctions() external view returns (BlindAuction[] memory) {
+        // Count active (not finalized)
+        uint256 count = 0;
+        for (uint256 i = 1; i < nextAuctionId; i++) {
+            if (!blindAuctions[i].finalized && blindAuctions[i].seller != address(0)) {
+                count++;
+            }
+        }
+        BlindAuction[] memory arr = new BlindAuction[](count);
+        uint256 idx = 0;
+        for (uint256 i = 1; i < nextAuctionId; i++) {
+            if (!blindAuctions[i].finalized && blindAuctions[i].seller != address(0)) {
+                arr[idx++] = blindAuctions[i];
+            }
+        }
+        return arr;
     }
 }

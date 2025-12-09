@@ -39,6 +39,21 @@ export const BatchNFTMinter = () => {
                     args: [connectedAddress, uploadedItem.path],
                 });
 
+                // 铸造成功后保存到数据库
+                try {
+                    await fetch("/api/db/save-image", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            walletAddress: connectedAddress,
+                            metadataHash: uploadedItem.path,
+                            imageUrl: currentTokenMetaData.image,
+                        }),
+                    });
+                } catch (e) {
+                    console.error("Save batch image to DB failed", e);
+                }
+
                 // 更新进度
                 setMintingProgress(i + 1);
 

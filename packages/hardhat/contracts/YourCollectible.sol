@@ -12,7 +12,7 @@ contract YourCollectible is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable 
     constructor() ERC721("YourCollectible", "YCB") Ownable(msg.sender) {}
 
     function _baseURI() internal pure override returns (string memory) {
-        return "https://gateway.pinata.cloud/ipfs/";
+        return "https://green-payable-guan-79.mypinata.cloud/ipfs/";
     }
 
     function mintItem(address to, string memory uri) public returns (uint256) {
@@ -21,6 +21,15 @@ contract YourCollectible is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable 
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         return tokenId;
+    }
+
+    function airdropMint(address[] memory recipients, string memory uri) public {
+        for (uint256 i = 0; i < recipients.length; i++) {
+            tokenIdCounter++;
+            uint256 tokenId = tokenIdCounter;
+            _safeMint(recipients[i], tokenId);
+            _setTokenURI(tokenId, uri);
+        }
     }
 
     // Override functions from OpenZeppelin ERC721, ERC721Enumerable and ERC721URIStorage

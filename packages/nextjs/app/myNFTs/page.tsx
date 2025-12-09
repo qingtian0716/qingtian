@@ -1,6 +1,6 @@
 "use client";
 
-import { MyHoldings, CustomNFTMinter, BatchNFTMinter, ExcelBatchMinter, MyListings } from "./_components";
+import { AirdropMinter, MyHoldings, CustomNFTMinter, BatchNFTMinter, ExcelBatchMinter, MyListings } from "./_components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
@@ -38,6 +38,21 @@ const MyNFTs: NextPage = () => {
         functionName: "mintItem",
         args: [connectedAddress, uploadedItem.path],
       });
+
+      // 铸造成功后保存到数据库
+      try {
+        await fetch("/api/db/save-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletAddress: connectedAddress,
+            metadataHash: uploadedItem.path,
+            imageUrl: currentTokenMetaData.image,
+          }),
+        });
+      } catch (e) {
+        console.error("Save preset image to DB failed", e);
+      }
     } catch (error) {
       notification.remove(notificationId);
       console.error(error);
@@ -81,6 +96,11 @@ const MyNFTs: NextPage = () => {
 
           {/* Excel Batch Minter */}
           <ExcelBatchMinter />
+
+          {/* Airdrop NFTs */}
+          <AirdropMinter />
+
+
         </div>
       )}
 

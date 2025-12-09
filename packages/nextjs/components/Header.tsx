@@ -38,15 +38,21 @@ export const menuLinks: HeaderMenuLink[] = [
     icon: <ArrowPathIcon className="h-4 w-4" />,
   },
   {
-    label: "IPFS Upload",
-    href: "/ipfsUpload",
-    icon: <ArrowUpTrayIcon className="h-4 w-4" />,
+    label: "Blind Auctions",
+    href: "/blind-auctions",
+    icon: <ArrowPathIcon className="h-4 w-4" />,
   },
-  {
-    label: "IPFS Download",
-    href: "/ipfsDownload",
-    icon: <ArrowDownTrayIcon className="h-4 w-4" />,
-  },
+
+  //{
+  //  label: "IPFS Upload",
+  // href: "/ipfsUpload",
+  // icon: <ArrowUpTrayIcon className="h-4 w-4" />,
+  //},
+  //{
+  //  label: "IPFS Download",
+  //  href: "/ipfsDownload",
+  //  icon: <ArrowDownTrayIcon className="h-4 w-4" />,
+  //},
   {
     label: "Debug Contracts",
     href: "/debug",

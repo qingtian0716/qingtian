@@ -3,8 +3,20 @@ import { parseEther } from "viem";
 import { Collectible } from "./MyHoldings";
 import { Address, AddressInput } from "~~/components/scaffold-eth";
 import { useScaffoldWriteContract, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+// --- 新增 Import: 用于获取部署合约信息 ---
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth/useDeployedContractInfo";
 
-export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: Collectible; selectable?: boolean; selected?: boolean; onSelectedChange?: (checked: boolean) => void; }) => {
+export const NFTCard = ({
+  nft,
+  selectable,
+  selected,
+  onSelectedChange
+}: {
+  nft: Collectible;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectedChange?: (checked: boolean) => void;
+}) => {
   const [transferToAddress, setTransferToAddress] = useState("");
   const [showTransfer, setShowTransfer] = useState(false);
   const [showSell, setShowSell] = useState(false);
@@ -12,10 +24,21 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
   const [isListing, setIsListing] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
 
+  // --- 新增状态: 盲拍相关 ---
+  const [showBlind, setShowBlind] = useState(false);
+  const [minBid, setMinBid] = useState("");
+  const [commitDuration, setCommitDuration] = useState("3600");
+  const [revealDuration, setRevealDuration] = useState("1800");
+  const [isCreatingBlind, setIsCreatingBlind] = useState(false);
+
   const { writeContractAsync } = useScaffoldWriteContract({ contractName: "YourCollectible" });
   const { writeContractAsync: writeMarketplaceContract } = useScaffoldWriteContract({ contractName: "NFTMarketplace" });
 
-  // 检查 NFT 是否有上架记录
+  // --- 新增 Hook: 获取合约信息 (用于盲拍) ---
+  const { data: marketplaceInfo } = useDeployedContractInfo({ contractName: "NFTMarketplace" });
+  const { data: collectibleInfo } = useDeployedContractInfo({ contractName: "YourCollectible" });
+
+  // --- 原有逻辑: 检查 NFT 是否有上架记录 ---
   const nftContractAddress = process.env.NEXT_PUBLIC_YOUR_COLLECTIBLE_ADDRESS || "0x0";
   const { data: existingListingId } = useScaffoldReadContract({
     contractName: "NFTMarketplace",
@@ -23,7 +46,7 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
     args: [nftContractAddress as `0x${string}`, BigInt(nft.id.toString())],
   });
 
-  // 获取 listing 详情来检查是否真的是暂停状态
+  // --- 原有逻辑: 获取 listing 详情 ---
   const { data: listingDetails } = useScaffoldReadContract({
     contractName: "NFTMarketplace",
     functionName: "listings",
@@ -33,24 +56,21 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
     },
   });
 
-  // 只有当 listingId 存在且 listing.active === false 时才是暂停状态
-  // listingDetails 格式: [tokenId, nftContract, seller, price, active]
+  // --- 原有逻辑: 判断是否暂停 ---
   const hasPausedListing = existingListingId !== undefined &&
     existingListingId > 0n &&
     listingDetails !== undefined &&
     (listingDetails as any)?.[4] === false;
 
-  // 恢复上架处理函数
+  // --- 原有功能: 恢复上架 ---
   const handleResumeListing = async () => {
     if (!existingListingId) return;
     try {
       setIsResuming(true);
-      // 先确保授权
       await writeContractAsync({
         functionName: "approve",
         args: [process.env.NEXT_PUBLIC_NFT_MARKETPLACE_ADDRESS || "0x0", BigInt(nft.id.toString())],
       });
-      // 恢复上架
       await writeMarketplaceContract({
         functionName: "resumeListing",
         args: [existingListingId],
@@ -64,6 +84,7 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
     }
   };
 
+  // --- 共同功能: 普通上架 (Sell) ---
   const handleSellNFT = async () => {
     if (!sellPrice || parseFloat(sellPrice) <= 0) {
       alert("请输入有效的价格");
@@ -72,14 +93,10 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
 
     try {
       setIsListing(true);
-
-      // 首先需要授权市场合约操作这个 NFT
       await writeContractAsync({
         functionName: "approve",
         args: [process.env.NEXT_PUBLIC_NFT_MARKETPLACE_ADDRESS || "0x0", BigInt(nft.id.toString())],
       });
-
-      // 然后在市场上列出 NFT
       await writeMarketplaceContract({
         functionName: "listNFT",
         args: [
@@ -88,7 +105,6 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
           parseEther(sellPrice)
         ],
       });
-
       setShowSell(false);
       setSellPrice("");
       alert("NFT 已成功上架到市场！");
@@ -97,6 +113,59 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
       alert("上架失败，请重试");
     } finally {
       setIsListing(false);
+    }
+  };
+
+  // --- 新增功能: 创建盲拍 ---
+  const handleCreateBlindAuction = async () => {
+    if (!minBid || parseFloat(minBid) <= 0) {
+      alert("请输入有效的最低出价");
+      return;
+    }
+    if (!commitDuration || !revealDuration) {
+      alert("请输入有效的提交/揭示时间");
+      return;
+    }
+
+    try {
+      setIsCreatingBlind(true);
+      const marketplaceAddress = marketplaceInfo?.address;
+      if (!marketplaceAddress) {
+        throw new Error("无法获取市场合约地址，请检查部署或网络配置");
+      }
+      // 授权
+      await writeContractAsync({
+        functionName: "approve",
+        args: [marketplaceAddress, BigInt(nft.id.toString())],
+      });
+
+      // 创建盲拍
+      await writeMarketplaceContract({
+        functionName: "createBlindAuction",
+        args: [
+          (() => {
+            const envAddr = process.env.NEXT_PUBLIC_YOUR_COLLECTIBLE_ADDRESS as `0x${string}` | undefined;
+            const resolved = (collectibleInfo?.address as `0x${string}` | undefined) || envAddr;
+            if (!resolved) throw new Error("无法获取NFT合约地址，请检查部署或环境变量");
+            return resolved;
+          })(),
+          BigInt(nft.id.toString()),
+          parseEther(minBid),
+          BigInt(commitDuration),
+          BigInt(revealDuration),
+        ],
+      });
+
+      setShowBlind(false);
+      setMinBid("");
+      setCommitDuration("3600");
+      setRevealDuration("1800");
+      alert("盲拍创建成功！请至盲拍市场查看");
+    } catch (err) {
+      console.error("Error creating blind auction:", err);
+      alert("盲拍创建失败，请重试");
+    } finally {
+      setIsCreatingBlind(false);
     }
   };
 
@@ -135,13 +204,11 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
       </figure>
 
       <div className="card-body p-6">
-        {/* NFT Title and Description */}
         <div className="mb-4">
           <h3 className="card-title text-xl font-bold mb-2 line-clamp-1">{nft.name}</h3>
           <p className="text-sm opacity-70 line-clamp-2">{nft.description}</p>
         </div>
 
-        {/* Attributes */}
         {nft.attributes && nft.attributes.length > 0 && (
           <div className="mb-4">
             <div className="flex flex-wrap gap-2">
@@ -159,7 +226,6 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
           </div>
         )}
 
-        {/* Owner Info */}
         <div className="mb-4 p-3 bg-base-200 rounded-lg">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold opacity-70">Owner</span>
@@ -169,15 +235,17 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
 
         {/* Action Buttons Section */}
         <div className="card-actions flex-col">
-          {/* 如果有暂停的上架记录，显示恢复上架按钮 */}
-          {hasPausedListing && !showTransfer && !showSell && (
+          {/* 原功能：暂停提示 */}
+          {hasPausedListing && !showTransfer && !showSell && !showBlind && (
             <div className="alert alert-warning mb-2">
               <span className="text-sm">此 NFT 有暂停的上架记录</span>
             </div>
           )}
 
-          {!showTransfer && !showSell ? (
+          {/* 按钮组逻辑：未点击任何操作按钮时显示 */}
+          {!showTransfer && !showSell && !showBlind ? (
             <div className="flex gap-2 w-full">
+              {/* Transfer 按钮 (所有状态通用) */}
               <button
                 className="btn btn-outline btn-sm flex-1"
                 onClick={() => setShowTransfer(true)}
@@ -187,6 +255,8 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
                 </svg>
                 Transfer
               </button>
+
+              {/* 原功能逻辑：如果暂停，显示恢复按钮；否则显示 Sell 和 盲拍 */}
               {hasPausedListing ? (
                 <button
                   className="btn btn-success btn-sm flex-1"
@@ -209,18 +279,31 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
                   )}
                 </button>
               ) : (
-                <button
-                  className="btn btn-primary btn-sm flex-1"
-                  onClick={() => setShowSell(true)}
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                  Sell
-                </button>
+                <>
+                  <button
+                    className="btn btn-primary btn-sm flex-1"
+                    onClick={() => setShowSell(true)}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                    Sell
+                  </button>
+                  {/* 新增功能按钮：盲拍上架 */}
+                  <button
+                    className="btn btn-secondary btn-sm flex-1"
+                    onClick={() => setShowBlind(true)}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
+                    </svg>
+                    盲拍
+                  </button>
+                </>
               )}
             </div>
           ) : showTransfer ? (
+            // Transfer 表单
             <div className="w-full space-y-3">
               <div className="form-control">
                 <label className="label">
@@ -258,14 +341,12 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
                     }
                   }}
                 >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
                   Send
                 </button>
               </div>
             </div>
           ) : showSell ? (
+            // Sell (一口价) 表单
             <div className="w-full space-y-3">
               <div className="form-control">
                 <label className="label">
@@ -302,12 +383,80 @@ export const NFTCard = ({ nft, selectable, selected, onSelectedChange }: { nft: 
                       Listing...
                     </>
                   ) : (
+                    "List for Sale"
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : showBlind ? (
+            // --- 新增功能: 盲拍表单 ---
+            <div className="w-full space-y-3">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-sm font-semibold">最低出价 (ETH):</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  placeholder="输入最低出价"
+                  className="input input-bordered input-sm w-full"
+                  value={minBid}
+                  onChange={(e) => setMinBid(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-sm font-semibold">提交期 (秒):</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="60"
+                    placeholder="例如 3600"
+                    className="input input-bordered input-sm w-full"
+                    value={commitDuration}
+                    onChange={(e) => setCommitDuration(e.target.value)}
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-sm font-semibold">揭示期 (秒):</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="300"
+                    placeholder="例如 1800"
+                    className="input input-bordered input-sm w-full"
+                    value={revealDuration}
+                    onChange={(e) => setRevealDuration(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="btn btn-ghost btn-sm flex-1"
+                  onClick={() => {
+                    setShowBlind(false);
+                    setMinBid("");
+                    setCommitDuration("3600");
+                    setRevealDuration("1800");
+                  }}
+                >
+                  取消
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm flex-1"
+                  disabled={!minBid || parseFloat(minBid) <= 0 || isCreatingBlind}
+                  onClick={handleCreateBlindAuction}
+                >
+                  {isCreatingBlind ? (
                     <>
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                      </svg>
-                      List for Sale
+                      <span className="loading loading-spinner loading-xs mr-1"></span>
+                      创建中...
                     </>
+                  ) : (
+                    "创建盲拍"
                   )}
                 </button>
               </div>

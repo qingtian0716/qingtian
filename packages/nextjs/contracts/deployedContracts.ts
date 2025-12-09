@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   1337: {
     NFTMarketplace: {
-      address: "0xdBD183d0D53611CBc8052Dd9E7F6Eb8B0C7A1604",
+      address: "0xC21f4627d018DE9102ad89B7a1Cf68f802c1A245",
       abi: [
         {
           inputs: [],
@@ -40,6 +40,130 @@ const deployedContracts = {
           inputs: [],
           name: "ReentrancyGuardReentrantCall",
           type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "auctionId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "nftContract",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "seller",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "minBid",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "commitEnd",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "revealEnd",
+              type: "uint256",
+            },
+          ],
+          name: "BlindAuctionCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "auctionId",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "winner",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "BlindAuctionFinalized",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "auctionId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "bidder",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "bytes32",
+              name: "commitment",
+              type: "bytes32",
+            },
+          ],
+          name: "BlindBidCommitted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "auctionId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "bidder",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "BlindBidRevealed",
+          type: "event",
         },
         {
           anonymous: false,
@@ -300,6 +424,118 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "auctionBidders",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "bidCommitments",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "blindAuctions",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "auctionId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "nftContract",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "seller",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "minBid",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "commitEnd",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "revealEnd",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "finalized",
+              type: "bool",
+            },
+            {
+              internalType: "address",
+              name: "highestBidder",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "highestBid",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
               name: "listingId",
               type: "uint256",
             },
@@ -343,6 +579,57 @@ const deployedContracts = {
         {
           inputs: [
             {
+              internalType: "uint256",
+              name: "auctionId",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes32",
+              name: "commitment",
+              type: "bytes32",
+            },
+          ],
+          name: "commitBlindBid",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "nftContract",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "minBid",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "commitDuration",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "revealDuration",
+              type: "uint256",
+            },
+          ],
+          name: "createBlindAuction",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
               internalType: "address",
               name: "nftContract",
               type: "address",
@@ -366,6 +653,19 @@ const deployedContracts = {
         {
           inputs: [
             {
+              internalType: "uint256",
+              name: "auctionId",
+              type: "uint256",
+            },
+          ],
+          name: "finalizeBlindAuction",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
               internalType: "address",
               name: "nftContract",
               type: "address",
@@ -382,6 +682,71 @@ const deployedContracts = {
               internalType: "uint256",
               name: "",
               type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getAllActiveBlindAuctions",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "auctionId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "tokenId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "nftContract",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "seller",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "minBid",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "commitEnd",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "revealEnd",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "finalized",
+                  type: "bool",
+                },
+                {
+                  internalType: "address",
+                  name: "highestBidder",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "highestBid",
+                  type: "uint256",
+                },
+              ],
+              internalType: "struct NFTMarketplace.BlindAuction[]",
+              name: "",
+              type: "tuple[]",
             },
           ],
           stateMutability: "view",
@@ -607,6 +972,19 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "nextAuctionId",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "nextListingId",
           outputs: [
             {
@@ -616,6 +994,40 @@ const deployedContracts = {
             },
           ],
           stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes",
+              name: "",
+              type: "bytes",
+            },
+          ],
+          name: "onERC721Received",
+          outputs: [
+            {
+              internalType: "bytes4",
+              name: "",
+              type: "bytes4",
+            },
+          ],
+          stateMutability: "pure",
           type: "function",
         },
         {
@@ -662,6 +1074,53 @@ const deployedContracts = {
           name: "resumeListing",
           outputs: [],
           stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "auctionId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes32",
+              name: "secret",
+              type: "bytes32",
+            },
+          ],
+          name: "revealBlindBid",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "revealedAmounts",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -744,11 +1203,13 @@ const deployedContracts = {
         owner: "@openzeppelin/contracts/access/Ownable.sol",
         renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
         transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        onERC721Received:
+          "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
       },
-      deployedOnBlock: 126179,
+      deployedOnBlock: 126890,
     },
     YourCollectible: {
-      address: "0x848818E5F05a93f644320797922Cc5A5875A585A",
+      address: "0xf0c47297056576Bab0D211FA821Af40774b905CF",
       abi: [
         {
           inputs: [],
@@ -1026,6 +1487,24 @@ const deployedContracts = {
           ],
           name: "Transfer",
           type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address[]",
+              name: "recipients",
+              type: "address[]",
+            },
+            {
+              internalType: "string",
+              name: "uri",
+              type: "string",
+            },
+          ],
+          name: "airdropMint",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
         },
         {
           inputs: [
@@ -1443,7 +1922,7 @@ const deployedContracts = {
         renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
         transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
       },
-      deployedOnBlock: 114498,
+      deployedOnBlock: 127062,
     },
   },
 } as const;

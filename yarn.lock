@@ -3581,6 +3581,7 @@ __metadata:
     eslint-plugin-prettier: ~5.2.4
     ipfs-utils: ^9.0.14
     kubo-rpc-client: ^3.0.1
+    mysql2: ^3.15.3
     next: ~15.2.3
     next-nprogress-bar: ~2.3.13
     next-themes: ~0.3.0
@@ -6173,6 +6174,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"aws-ssl-profiles@npm:^1.1.1":
+  version: 1.1.2
+  resolution: "aws-ssl-profiles@npm:1.1.2"
+  checksum: bfcf9b2cbb9788e24e4af39a1e8b4a8afbdf65773b6a1636e643c10068ffbae46b28277c4c9f9321179400b2080092db040ba4513f9143f22d1bb053a12dab2b
+  languageName: node
+  linkType: hard
+
 "aws4@npm:^1.13.2":
   version: 1.13.2
   resolution: "aws4@npm:1.13.2"
@@ -7641,6 +7649,13 @@ __metadata:
   version: 1.0.0
   resolution: "delegates@npm:1.0.0"
   checksum: a51744d9b53c164ba9c0492471a1a2ffa0b6727451bdc89e31627fdf4adda9d51277cfcbfb20f0a6f08ccb3c436f341df3e92631a3440226d93a8971724771fd
+  languageName: node
+  linkType: hard
+
+"denque@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "denque@npm:2.1.0"
+  checksum: 1d4ae1d05e59ac3a3481e7b478293f4b4c813819342273f3d5b826c7ffa9753c520919ba264f377e09108d24ec6cf0ec0ac729a5686cbb8f32d797126c5dae74
   languageName: node
   linkType: hard
 
@@ -9661,6 +9676,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"generate-function@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "generate-function@npm:2.3.1"
+  dependencies:
+    is-property: ^1.0.2
+  checksum: 652f083de206ead2bae4caf9c7eeb465e8d98c0b8ed2a29c6afc538cef0785b5c6eea10548f1e13cc586d3afd796c13c830c2cb3dc612ec2457b2aadda5f57c9
+  languageName: node
+  linkType: hard
+
 "generic-pool@npm:3.4.2":
   version: 3.4.2
   resolution: "generic-pool@npm:3.4.2"
@@ -10458,6 +10482,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"iconv-lite@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "iconv-lite@npm:0.7.0"
+  dependencies:
+    safer-buffer: ">= 2.1.2 < 3.0.0"
+  checksum: f362a8befb95e37f29be1d1290c17e0c9d0d4ad4fa62fcfd813cc9c937ab89401abed9a011f83e10651a267abb2aa231ec7da91d843570bec873bd98489b5bf8
+  languageName: node
+  linkType: hard
+
 "idb-keyval@npm:^6.2.1":
   version: 6.2.2
   resolution: "idb-keyval@npm:6.2.2"
@@ -11064,6 +11097,13 @@ __metadata:
   version: 2.1.0
   resolution: "is-plain-obj@npm:2.1.0"
   checksum: cec9100678b0a9fe0248a81743041ed990c2d4c99f893d935545cfbc42876cbe86d207f3b895700c690ad2fa520e568c44afc1605044b535a7820c1d40e38daa
+  languageName: node
+  linkType: hard
+
+"is-property@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "is-property@npm:1.0.2"
+  checksum: 33b661a3690bcc88f7e47bb0a21b9e3187e76a317541ea7ec5e8096d954f441b77a46d8930c785f7fbf4ef8dfd624c25495221e026e50f74c9048fe501773be5
   languageName: node
   linkType: hard
 
@@ -12283,7 +12323,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"long@npm:^5.0.0":
+"long@npm:^5.0.0, long@npm:^5.2.1":
   version: 5.3.2
   resolution: "long@npm:5.3.2"
   checksum: be215816b563f4ca27ad3677678b53415bc489f9e3466414e54d2d85f5f8e86768547fa58493bacfb363ffc57a664debc83403ccc2178aef0c40aca28bad47c9
@@ -12330,6 +12370,13 @@ __metadata:
   dependencies:
     yallist: ^4.0.0
   checksum: f97f499f898f23e4585742138a22f22526254fdba6d75d41a1c2526b3b6cc5747ef59c5612ba7375f42aca4f8461950e925ba08c991ead0651b4918b7c978297
+  languageName: node
+  linkType: hard
+
+"lru.min@npm:^1.0.0, lru.min@npm:^1.1.0":
+  version: 1.1.3
+  resolution: "lru.min@npm:1.1.3"
+  checksum: 11451baf8606d29f77cc1e22fc917a4287dcf8d8c188f098c56c0b52489c4c6299ee8f910af53065d7bdd0073d3c5263c6003c5958877d7a03d305b977150e13
   languageName: node
   linkType: hard
 
@@ -12860,6 +12907,32 @@ __metadata:
   version: 2.0.0
   resolution: "mute-stream@npm:2.0.0"
   checksum: d2e4fd2f5aa342b89b98134a8d899d8ef9b0a6d69274c4af9df46faa2d97aeb1f2ce83d867880d6de63643c52386579b99139801e24e7526c3b9b0a6d1e18d6c
+  languageName: node
+  linkType: hard
+
+"mysql2@npm:^3.15.3":
+  version: 3.15.3
+  resolution: "mysql2@npm:3.15.3"
+  dependencies:
+    aws-ssl-profiles: ^1.1.1
+    denque: ^2.1.0
+    generate-function: ^2.3.1
+    iconv-lite: ^0.7.0
+    long: ^5.2.1
+    lru.min: ^1.0.0
+    named-placeholders: ^1.1.3
+    seq-queue: ^0.0.5
+    sqlstring: ^2.3.2
+  checksum: f0280dac3b49a36b320afbdff25c03e19017a9bd18c7f65f75a4083d9bb62172b5555f85870fba53e19485a79ae0273277b7318eda2be644e495528bad00610b
+  languageName: node
+  linkType: hard
+
+"named-placeholders@npm:^1.1.3":
+  version: 1.1.4
+  resolution: "named-placeholders@npm:1.1.4"
+  dependencies:
+    lru.min: ^1.1.0
+  checksum: d46b15420bee3efe2f344311cde42446b3f81e8415ffd455fcf74132c0cfdb691d56d4878892cc83950240d401a44726fbb83b76a79f0b3ff422206d04d042a2
   languageName: node
   linkType: hard
 
@@ -15360,6 +15433,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"seq-queue@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "seq-queue@npm:0.0.5"
+  checksum: f8695a6cb613e1b378b9686cde4ea626944091a412fc1c9d24c5039283d4351dd115f4505e4cf103d3a2e4a9a6a72fc7698fdce703839fb1fec9627aa4ce5563
+  languageName: node
+  linkType: hard
+
 "serialize-javascript@npm:^6.0.2":
   version: 6.0.2
   resolution: "serialize-javascript@npm:6.0.2"
@@ -15902,6 +15982,13 @@ __metadata:
   version: 1.0.3
   resolution: "sprintf-js@npm:1.0.3"
   checksum: 19d79aec211f09b99ec3099b5b2ae2f6e9cdefe50bc91ac4c69144b6d3928a640bb6ae5b3def70c2e85a2c3d9f5ec2719921e3a59d3ca3ef4b2fd1a4656a0df3
+  languageName: node
+  linkType: hard
+
+"sqlstring@npm:^2.3.2":
+  version: 2.3.3
+  resolution: "sqlstring@npm:2.3.3"
+  checksum: 1e7e2d51c38a0cf7372e875408ca100b6e0c9a941ab7773975ea41fb36e5528e404dc787689be855780cf6d0a829ff71027964ae3a05a7446e91dce26672fda7
   languageName: node
   linkType: hard
 

@@ -107,6 +107,21 @@ export const CustomNFTMinter = () => {
                 args: [connectedAddress, metadataResult.metadataHash],
             });
 
+            // 铸造成功后保存到数据库
+            try {
+                await fetch("/api/db/save-image", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        walletAddress: connectedAddress,
+                        metadataHash: metadataResult.metadataHash,
+                        imageUrl: uploadedImageUrl,
+                    }),
+                });
+            } catch (e) {
+                console.error("Save image to DB failed", e);
+            }
+
             notification.remove(notificationId);
             notification.success("Custom NFT minted successfully!");
 

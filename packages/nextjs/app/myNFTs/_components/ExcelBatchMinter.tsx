@@ -109,6 +109,21 @@ export const ExcelBatchMinter = () => {
                     args: [connectedAddress, nftResult.metadataHash],
                 });
 
+                // 铸造成功后保存到数据库
+                try {
+                    await fetch("/api/db/save-image", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            walletAddress: connectedAddress,
+                            metadataHash: nftResult.metadataHash,
+                            imageUrl: nftResult.imageUrl,
+                        }),
+                    });
+                } catch (e) {
+                    console.error("Save excel batch image to DB failed", e);
+                }
+
                 // 更新进度
                 setMintingProgress(i + 1);
 
