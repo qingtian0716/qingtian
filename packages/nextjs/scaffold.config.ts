@@ -1,4 +1,16 @@
 import * as chains from "viem/chains";
+import { defineChain } from "viem";
+
+// 1. 你的本地 Geth 链（端口 8889）
+export const localGeth = defineChain({
+  id: 1337,
+  name: "Local Geth",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["http://47.94.148.98:8889"] },
+    public: { http: ["http://47.94.148.98:8889"] },
+  },
+});
 
 export type BaseConfig = {
   targetNetworks: readonly chains.Chain[];
@@ -15,9 +27,14 @@ export const DEFAULT_ALCHEMY_API_KEY = "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.hardhat],
+  targetNetworks: [
+    localGeth,
+    chains.sepolia,
+    chains.hardhat
+
+  ] as const,
   // The interval at which your front-end polls the RPC servers for new data (it has no effect if you only target the local network (default is 4000))
-  pollingInterval: 30000,
+  pollingInterval: 8000,
   // This is ours Alchemy's default API key.
   // You can get your own at https://dashboard.alchemyapi.io
   // It's recommended to store it in an env variable:
@@ -26,6 +43,7 @@ const scaffoldConfig = {
   // If you want to use a different RPC for a specific network, you can add it here.
   // The key is the chain ID, and the value is the HTTP RPC URL
   rpcOverrides: {
+    [localGeth.id]: "http://47.94.148.98:8889",  // 1337 → 8889
     // Example:
     // [chains.mainnet.id]: "https://mainnet.buidlguidl.com",
   },

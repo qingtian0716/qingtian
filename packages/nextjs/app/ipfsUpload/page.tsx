@@ -68,8 +68,8 @@ const IpfsUpload: NextPage = () => {
         </button>
         {uploadedIpfsPath && (
           <div className="mt-4">
-            <a href={`https://ipfs.io/ipfs/${uploadedIpfsPath}`} target="_blank" rel="noreferrer">
-              {`https://ipfs.io/ipfs/${uploadedIpfsPath}`}
+            <a href={`https://gateway.pinata.cloud/ipfs/${uploadedIpfsPath}`} target="_blank" rel="noreferrer">
+              {`https://gateway.pinata.cloud/ipfs/${uploadedIpfsPath}`}
             </a>
           </div>
         )}

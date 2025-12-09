@@ -1,35 +1,53 @@
-import { create } from "kubo-rpc-client";
+// Pinata API configuration
+const PINATA_API_KEY = process.env.PINATA_API_KEY || "your_pinata_api_key_here";
+const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY || "your_pinata_secret_key_here";
+const PINATA_GATEWAY = process.env.PINATA_GATEWAY || "gateway.pinata.cloud";
 
-const PROJECT_ID = "2GajDLTC6y04qsYsoDRq9nGmWwK";
-const PROJECT_SECRET = "48c62c6b3f82d2ecfa2cbe4c90f97037";
-const PROJECT_ID_SECRECT = `${PROJECT_ID}:${PROJECT_SECRET}`;
+// Pinata API client for uploading to IPFS
+export const ipfsClient = {
+  async add(content: string) {
+    try {
+      const response = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          pinata_api_key: PINATA_API_KEY,
+          pinata_secret_api_key: PINATA_SECRET_API_KEY,
+        },
+        body: JSON.stringify({
+          pinataContent: JSON.parse(content),
+          pinataMetadata: {
+            name: "NFT Metadata",
+          },
+        }),
+      });
 
-export const ipfsClient = create({
-  host: "ipfs.infura.io",
-  port: 5001,
-  protocol: "https",
-  headers: {
-    Authorization: `Basic ${Buffer.from(PROJECT_ID_SECRECT).toString("base64")}`,
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return { path: result.IpfsHash };
+    } catch (error) {
+      console.error("Error uploading to Pinata:", error);
+      throw error;
+    }
   },
-});
+};
 
 export async function getNFTMetadataFromIPFS(ipfsHash: string) {
-  for await (const file of ipfsClient.get(ipfsHash)) {
-    // The file is of type unit8array so we need to convert it to string
-    const content = new TextDecoder().decode(file);
-    // Remove any leading/trailing whitespace
-    const trimmedContent = content.trim();
-    // Find the start and end index of the JSON object
-    const startIndex = trimmedContent.indexOf("{");
-    const endIndex = trimmedContent.lastIndexOf("}") + 1;
-    // Extract the JSON object string
-    const jsonObjectString = trimmedContent.slice(startIndex, endIndex);
-    try {
-      const jsonObject = JSON.parse(jsonObjectString);
-      return jsonObject;
-    } catch (error) {
-      console.log("Error parsing JSON:", error);
-      return undefined;
+  try {
+    // Use Pinata gateway to fetch metadata
+    const response = await fetch(`https://${PINATA_GATEWAY}/ipfs/${ipfsHash}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const jsonObject = await response.json();
+    return jsonObject;
+  } catch (error) {
+    console.log("Error fetching from IPFS:", error);
+    return undefined;
   }
 }

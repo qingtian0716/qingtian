@@ -37,7 +37,7 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  defaultNetwork: "localhost",
+  defaultNetwork: "localgeth",
   namedAccounts: {
     deployer: {
       // By default, it will take the first Hardhat account as the deployer
@@ -52,7 +52,15 @@ const config: HardhatUserConfig = {
         url: `https://eth-mainnet.alchemyapi.io/v2/${providerApiKey}`,
         enabled: process.env.MAINNET_FORKING_ENABLED === "true",
       },
+
     },
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← 添加的这一条
+    localgeth: {
+      url: "http://47.94.148.98:8889",
+      chainId: 1337,
+      accounts: [deployerPrivateKey],
+    },
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← 添加结束
     mainnet: {
       url: "https://mainnet.rpc.buidlguidl.com",
       accounts: [deployerPrivateKey],

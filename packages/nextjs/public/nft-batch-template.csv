@@ -1,0 +1,4 @@
+﻿name,description,image_file,trait_type_1,trait_value_1,trait_type_2,trait_value_2,trait_type_3,trait_value_3
+My First NFT,This is my first custom NFT,image1.jpg,Background,Blue,Rarity,Common,Type,Digital Art
+My Second NFT,This is my second custom NFT,image2.png,Background,Red,Rarity,Rare,Type,Digital Art
+My Third NFT,This is my third custom NFT,image3.gif,Background,Green,Rarity,Epic,Type,Animation

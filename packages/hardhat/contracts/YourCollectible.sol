@@ -12,7 +12,7 @@ contract YourCollectible is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable 
     constructor() ERC721("YourCollectible", "YCB") Ownable(msg.sender) {}
 
     function _baseURI() internal pure override returns (string memory) {
-        return "https://ipfs.io/ipfs/";
+        return "https://gateway.pinata.cloud/ipfs/";
     }
 
     function mintItem(address to, string memory uri) public returns (uint256) {
