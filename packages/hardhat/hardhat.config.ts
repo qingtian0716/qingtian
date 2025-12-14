@@ -56,7 +56,7 @@ const config: HardhatUserConfig = {
     },
     // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← 添加的这一条
     localgeth: {
-      url: "http://47.94.148.98:8889",
+      url: "http://yoururl:8889",
       chainId: 1337,
       accounts: [deployerPrivateKey],
     },
