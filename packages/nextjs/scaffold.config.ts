@@ -7,8 +7,8 @@ export const localGeth = defineChain({
   name: "Local Geth",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
-    default: { http: ["http://47.94.148.98:8889"] },
-    public: { http: ["http://47.94.148.98:8889"] },
+    default: { http: ["http://yoururl:8889"] },
+    public: { http: ["http://yoururl:8889"] },
   },
 });
 
