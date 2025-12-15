@@ -4,7 +4,7 @@
   NFT 市场
 </h4>
 
-🎨 OP Sea 是一个功能完整的 NFT 交易平台，支持 NFT 铸造、上架交易、报价系统和盲拍竞拍。基于 Scaffold-ETH 2 开发，运行在 本地网络上。
+🎨 基于 Scaffold-ETH 2 开发，运行在 本地网络上。
 
 ⚙️ 技术栈：NextJS、RainbowKit、Hardhat、Wagmi、Viem、TypeScript、Pinata IPFS、MySQL。
 
