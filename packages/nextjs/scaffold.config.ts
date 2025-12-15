@@ -43,7 +43,7 @@ const scaffoldConfig = {
   // If you want to use a different RPC for a specific network, you can add it here.
   // The key is the chain ID, and the value is the HTTP RPC URL
   rpcOverrides: {
-    [localGeth.id]: "http://47.94.148.98:8889",  // 1337 → 8889
+    [localGeth.id]: "http://yoururl:8889",  // 
     // Example:
     // [chains.mainnet.id]: "https://mainnet.buidlguidl.com",
   },
