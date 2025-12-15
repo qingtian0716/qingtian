@@ -1,250 +1,225 @@
-# 🏗 Scaffold-ETH 2
+# �  NFT 交易平台
 
 <h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
+  NFT 市场
 </h4>
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+🎨 OP Sea 是一个功能完整的 NFT 交易平台，支持 NFT 铸造、上架交易、报价系统和盲拍竞拍。基于 Scaffold-ETH 2 开发，运行在 本地网络上。
 
-⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
+⚙️ 技术栈：NextJS、RainbowKit、Hardhat、Wagmi、Viem、TypeScript、Pinata IPFS、MySQL。
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+## ✨ 核心功能
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+### 🖼️ NFT 铸造
+- **单个铸造**：上传图片并铸造自定义 NFT
+- **批量铸造**：一次性铸造多个 NFT
+- **Excel 批量铸造**：通过 Excel 文件批量导入 NFT 数据
+- **空投铸造**：向指定地址批量空投 NFT
 
-## Requirements
+### 🏪 NFT 市场
+- **上架销售**：设置价格将 NFT 上架到市场
+- **一键购买**：直接以上架价格购买 NFT
+- **修改价格**：随时调整上架 NFT 的售价
+- **暂停/恢复**：暂时下架或重新上架 NFT
 
-Before you begin, you need to install the following tools:
+### 💰 报价系统
+- **发起报价**：对上架的 NFT 发起报价
+- **接受报价**：卖家可选择接受心仪的报价
+- **取消报价**：买家可随时取消自己的报价
 
-- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
-- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
+### 🔒 盲拍功能
+- **创建盲拍**：设置最低出价和时间参数
+- **提交承诺**：在承诺期内提交加密出价
+- **揭示出价**：在揭示期内公开真实出价金额
+- **结算拍卖**：自动结算并退还未中标者的资金
+
+## 🛠️ 环境要求
+
+开始之前，请确保已安装以下工具：
+
+- [Node.js (>= v20.18.3)](https://nodejs.org/en/download/)
+- [Yarn (v1 或 v2+)](https://yarnpkg.com/getting-started/install)
 - [Git](https://git-scm.com/downloads)
+- [MySQL 数据库](https://www.mysql.com/downloads/)
 
-# 🚩 Challenge: 🎟 Simple NFT Example
+## � 快速开始
 
-![readme](https://raw.githubusercontent.com/scaffold-eth/se-2-challenges/challenge-simple-nft-example/extension/packages/nextjs/public/hero.png)
+### 1. 克隆项目并安装依赖
 
-📚 This tutorial is meant for developers that already understand the [ 🖍️ basics ](https://www.youtube.com/watch?v=MlJPjJQZtC8).
-
-🧑‍🏫 If you would like a more gentle introduction for developers, watch our 15 video [🎥 Web2 to Web3](https://www.youtube.com/playlist?list=PLJz1HruEnenAf80uOfDwBPqaliJkjKg69) series.
-
----
-
-🎫 Create a simple NFT:
-
-👷‍♀️ You'll compile and deploy your first smart contracts. Then, you'll use a template NextJS app full of important Ethereum components and hooks. Finally, you'll deploy an NFT to a public network to share with friends! 🚀
-
-🌟 The final deliverable is an app that lets users purchase and transfer NFTs. Deploy your contracts to a testnet, then build and upload your app to a public web server. Submit the url on [SpeedRunEthereum.com](https://speedrunethereum.com)!
-
-💬 Meet other builders working on this challenge and get help in the [Challenge Telegram](https://t.me/+Y2vqXZZ_pEFhMGMx)!
-
-🤖 If you have any question during your Challenge, you can try out the [Challenge AI assistant](https://scaffold-eth-assistant.streamlit.app/), and get answers to your Challenge/Scaffold-ETH questions. Please reach us in Telegram if something feels wrong!
-
-## Checkpoint 0: 📦 Environment 📚
-
-> Start your local network (a blockchain emulator in your computer):
-
-```
-yarn chain
+```bash
+git clone https://github.com/qingtian0716/qingtian.git
+cd 路径
+yarn install
 ```
 
-> in a second terminal window, 🛰 deploy your contract (locally):
+### 2. 配置环境变量
 
-```
-yarn deploy
+复制环境变量模板并填写配置：
+
+**Hardhat 配置** (`packages/hardhat/.env`)：
+```bash
+ALCHEMY_API_KEY=your_alchemy_api_key
+DEPLOYER_PRIVATE_KEY=your_private_key
+ETHERSCAN_API_KEY=your_etherscan_api_key
 ```
 
-> in a third terminal window, start your 📱 frontend:
+**NextJS 配置** (`packages/nextjs/.env.local`)：
+```bash
+# Alchemy 和 WalletConnect
+NEXT_PUBLIC_ALCHEMY_API_KEY=your_alchemy_api_key
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
 
+# Pinata IPFS 配置
+PINATA_API_KEY=your_pinata_api_key
+PINATA_SECRET_API_KEY=your_pinata_secret_key
+PINATA_GATEWAY=your_gateway.mypinata.cloud
+
+# 合约地址（部署后填写）
+NEXT_PUBLIC_YOUR_COLLECTIBLE_ADDRESS=0x...
+NEXT_PUBLIC_NFT_MARKETPLACE_ADDRESS=0x...
+
+# MySQL 数据库配置
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_DATABASE=nft
 ```
+
+### 3. 启动本地开发环境
+
+```bash
+# 终端 1：初始化账号
+ yarn generate
+ yarn account
+ 打开metamask，向初始化账户转账eth
+
+# 终端 2：部署合约
+yarn deploy --network localgeth
+
+把对应合约地址写入env.local文件
+
+# 终端 3：启动前端
 yarn start
 ```
 
-📱 Open [http://localhost:3000](http://localhost:3000) to see the app.
+📱 打开浏览器访问 [http://localhost:3000](http://localhost:3000)
 
----
-
-## Checkpoint 1: ⛽️ Gas & Wallets 👛
-
-> ⛽️ You'll need to get some funds from the faucet for gas.
-
-![gas&wallet](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/912d0d4b-db34-49d3-bd7d-7ca0ab18eb66)
-
-> 🦊 At first, **don't** connect MetaMask. If you are already connected, click **Disconnect**:
-
-<p>
-  <img src="https://github.com/scaffold-eth/se-2-challenges/assets/80153681/2c7a1e40-50ad-4c20-ba3e-a56eff4b892b" width="33%" />
-  <img src="https://github.com/scaffold-eth/se-2-challenges/assets/80153681/1bcf9752-e8ae-4db6-a0a6-5dc774abe46c" width="33%" />
-</p>
-
-> 🔥 We'll use burner wallets on localhost.
-
-> 👛 Explore how burner wallets work in 🏗 Scaffold-ETH 2 by opening a new incognito window and navigate to http://localhost:3000. You'll notice it has a new wallet address in the top right. Copy the incognito browser's address and send localhost test funds to it from your first browser (using the **Faucet** button in the bottom left):
-
-![icognito&webBrowser](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/fd191447-a31f-4c03-a36f-936bfb70c2a1)
-
-> 👨🏻‍🚒 When you close the incognito window, the account is gone forever. Burner wallets are great for local development but you'll move to more permanent wallets when you interact with public networks.
-
----
-
-## Checkpoint 2: 🖨 Minting
-
-> ✏️ Mint some NFTs! Click the **MINT NFT** button in the  `My NFTs` tab.
-
-![image](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/74cf02f2-4c1b-4278-9841-f19f668e0b1e)
-
-👀 You should see your NFTs start to show up:
-
-![image](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/63dabceb-ad42-4c09-8e5d-a0139939e32d)
-
-👛 Open an incognito window and navigate to http://localhost:3000
-
-🎟 Transfer an NFT to the incognito window address using the UI:
-
-![image](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/3b92fb50-d43f-48a8-838c-c45c443b0b71)
-
-👛 Try to mint an NFT from the incognito window.
-
-> Can you mint an NFT with no funds in this address? You might need to grab funds from the faucet to pay for the gas!
-
-🕵🏻‍♂️ Inspect the `Debug Contracts` tab to figure out what address is the owner of YourCollectible?
-
-🔏 You can also check out your smart contract `YourCollectible.sol` in `packages/hardhat/contracts`.
-
-💼 Take a quick look at your deploy script `00_deploy_your_contract.js` in `packages/hardhat/deploy`.
-
-📝 If you want to edit the frontend, navigate to `packages/nextjs/app` and open the specific page you want to modify. For instance: `/myNFTs/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-
----
-
-## Checkpoint 3: 💾 Deploy your contract! 🛰
-
-🛰 Ready to deploy to a public testnet?!?
-
-> Change the defaultNetwork in `packages/hardhat/hardhat.config.ts` to `sepolia`.
-
-![chall-0-hardhat-config](https://github.com/scaffold-eth/se-2-challenges/assets/55535804/f94b47d8-aa51-46eb-9c9e-7536559a5d45)
-
-You will be prompted to enter a password, which will be used to encrypt your private key. **Make sure to remember this password, as you'll need it for future deployments and account queries.**
-
-🔐 Generate a deployer address with `yarn generate`. This creates a unique deployer address and saves the mnemonic locally.
-
-> This local account will deploy your contracts, allowing you to avoid entering a personal private key.
-
-![chall-0-yarn-generate](https://github.com/scaffold-eth/se-2-challenges/assets/2486142/133f5701-e575-4cc2-904f-cdc83ae86d94)
-
-👩‍🚀 Use `yarn account` to view your deployer account balances.
-
-![chall-0-yarn-account](https://github.com/scaffold-eth/se-2-challenges/assets/2486142/c34df8c9-9793-4a76-849b-170fae7fd0f0)
-
-⛽️ You will need to send ETH to your deployer address with your wallet, or get it from a public faucet of your chosen network.
-
-> Some popular Sepolia faucets are the [Alchemy Faucet](https://sepoliafaucet.com/), [Infura Faucet](https://www.infura.io/faucet/sepolia), and [Google Cloud Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia).
-
-> ⚔️ Side Quest: Keep a 🧑‍🎤 [punkwallet.io](https://punkwallet.io) on your phone's home screen and keep it loaded with testnet eth. 🧙‍♂️ You'll look like a wizard when you can fund your deployer address from your phone in seconds.
-
-🚀 Deploy your NFT smart contract with `yarn deploy`.
-
-> 💬 Hint: You can set the `defaultNetwork` in `hardhat.config.ts` to `sepolia` **OR** you can `yarn deploy --network sepolia`.
-
----
-
-## Checkpoint 4: 🚢 Ship your frontend! 🚁
-
-> ✏️ Edit your frontend config in `packages/nextjs/scaffold.config.ts` to change the `targetNetwork` to `chains.sepolia` :
-
-![chall-0-scaffold-config](https://github.com/scaffold-eth/se-2-challenges/assets/12072395/ff03bda0-66c6-4907-a9ad-bc8587da8036)
-
-> You should see the correct network in the frontend (http://localhost:3000):
-
-![image](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/50eef1f7-e1a3-4b3b-87e2-59c19362c4ff)
-
-> 🦊 Since we have deployed to a public testnet, you will now need to connect using a wallet you own or use a burner wallet. By default 🔥 `burner wallets` are only available on `hardhat` . You can enable them on every chain by setting `onlyLocalBurnerWallet: false` in your frontend config (`scaffold.config.ts` in `packages/nextjs/`).
-
-![image](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/f582d311-9b57-4503-8143-bac60346ea33)
-
-🚀 Deploy your NextJS App
+## � 项目结构
 
 ```
-yarn vercel
+nft_finish/
+├── packages/
+│   ├── hardhat/              # 智能合约
+│   │   ├── contracts/
+│   │   │   ├── YourCollectible.sol    # NFT 合约 (ERC721)
+│   │   │   └── NFTMarketplace.sol     # 市场合约
+│   │   └── deploy/           # 部署脚本
+│   │
+│   └── nextjs/               # 前端应用
+│       ├── app/
+│       │   ├── myNFTs/       # 我的 NFT 页面
+│       │   ├── marketplace/  # NFT 市场
+│       │   ├── blind-auctions/  # 盲拍广场
+│       │   ├── ipfsUpload/   # IPFS 上传
+│       │   └── ipfsDownload/ # IPFS 下载
+│       ├── components/       # 公共组件
+│       └── utils/            # 工具函数
 ```
 
-> You might need to log in to Vercel first by running `yarn vercel:login`. Once you log in (email, GitHub, etc), the default options should work.
+## 🔗 智能合约
 
-> If you want to redeploy to the same production URL you can run `yarn vercel --prod`. If you omit the `--prod` flag it will deploy it to a preview/test URL.
+### YourCollectible.sol
+基于 ERC721 的 NFT 合约，支持：
+- NFT 铸造（`mintItem`）
+- 元数据 URI 存储
+- 所有权查询
 
-> Follow the steps to deploy to Vercel. It'll give you a public URL.
+### NFTMarketplace.sol
+NFT 市场合约，支持：
+- **上架管理**：上架、购买、取消、暂停、恢复
+- **报价系统**：发起报价、取消报价、接受报价
+- **盲拍功能**：创建盲拍、提交承诺、揭示出价、结算拍卖
 
-⚠️ Run the automated testing function to make sure your app passes
+## 🌐 部署到测试网
 
+### 1. 生成部署账户
+
+```bash
+yarn generate
 ```
+
+### 2. 查看账户余额
+
+```bash
+yarn account
+```
+
+### 3. 获取测试网 ETH
+
+Optimism Sepolia 测试网水龙头：
+- [Alchemy Faucet](https://www.alchemy.com/faucets/optimism-sepolia)
+- [Optimism Faucet](https://app.optimism.io/faucet)
+
+### 4. 部署合约
+
+```bash
+# 修改 hardhat.config.ts 中的 defaultNetwork
+yarn deploy
+```
+
+### 5. 验证合约
+
+```bash
+yarn verify --network localgeth
+```
+
+
+## 📝 API 说明
+
+### IPFS API
+- `POST /api/ipfs/upload` - 上传文件到 IPFS
+- `GET /api/ipfs/[hash]` - 获取 IPFS 文件
+
+### 数据库 API
+- `POST /api/db/save-image` - 保存 NFT 图片链接
+- `GET /api/db/get-image` - 获取 NFT 图片链接
+
+### 网络信息 API
+- `GET /api/network-info` - 获取当前区块高度和 Gas 价格
+
+## � 常用命令
+
+```bash
+# 启动本地区块链
+yarn chain
+
+# 部署合约
+yarn deploy
+
+# 启动前端开发服务器
+yarn start
+
+# 运行测试
 yarn test
+
+# 格式化代码
+yarn format
+
+# 检查类型
+yarn lint
 ```
 
-#### Configuration of Third-Party Services for Production-Grade Apps.
+## 📄 许可证
 
-By default, 🏗 Scaffold-ETH 2 provides predefined API keys for popular services such as Alchemy and Etherscan. This allows you to begin developing and testing your applications more easily, avoiding the need to register for these services.
-This is great to complete your **SpeedRunEthereum**.
+本项目基于 MIT 许可证开源。
 
-For production-grade applications, it's recommended to obtain your own API keys (to prevent rate limiting issues). You can configure these at:
+## 🙏 致谢
 
-- 🔷 `ALCHEMY_API_KEY` variable in `packages/hardhat/.env` and `packages/nextjs/.env.local`. You can create API keys from the [Alchemy dashboard](https://dashboard.alchemy.com/).
-
-- 📃 `ETHERSCAN_API_KEY` variable in `packages/hardhat/.env` with your generated API key. You can get your key [here](https://etherscan.io/myapikey).
-
-> 💬 Hint: It's recommended to store env's for nextjs in Vercel/system env config for live apps and use .env.local for local testing.
+本项目基于 [Scaffold-ETH 2](https://scaffoldeth.io) 开发，感谢 Scaffold-ETH 团队提供的优秀开发框架。
 
 ---
 
-## Checkpoint 5: 📜 Contract Verification
-
-You can verify your smart contract on Etherscan by running (`yarn verify --network network_name`) :
-
-```
-yarn verify --network sepolia
-```
-
-> It is okay if it says your contract is already verified. Copy the address of YourCollectable.sol and search it on sepolia Etherscan to find the correct URL you need to submit this challenge.
-
-## Checkpoint 6: 💪 Flex!
-
-👩‍❤️‍👨 Share your public url with a friend and ask them for their address to send them a collectible :)
-
-![gif](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/547612f6-97b9-4eb3-ab6d-9b6d2c0ac769)
-
-## ⚔️ Side Quests
-
-### 🐟 Open Sea
-
-> 🐃 Want to see your new NFTs on Opensea? Head to [Testnets Opensea](https://testnets.opensea.io/)
-
-> 🎫 Make sure you have minted some NFTs on your Vercel page, then connect to Opensea using that same wallet.
-
-![image](https://github.com/scaffold-eth/se-2-challenges/assets/80153681/c752b365-b801-4a02-ba2e-62e0270b3795)
-
-> You can see your collection of shiny new NFTs on a testnet!
-
-(It can take a while before they show up, but here is an example:) https://testnets.opensea.io/assets/sepolia/0x17ed03686653917efa2194a5252c5f0a4f3dc49c/2
-
----
-
-> 🏃 Head to your next challenge [here](https://github.com/scaffold-eth/se-2-challenges).
-
-> 💬 Problems, questions, comments on the stack? Post them to the [🏗 scaffold-eth developers chat](https://t.me/joinchat/F7nCRK3kI93PoCOk)
-
-## Documentation
-
-Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
-
-To know more about its features, check out our [website](https://scaffoldeth.io).
-
-## Contributing to Scaffold-ETH 2
-
-We welcome contributions to Scaffold-ETH 2!
-
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+<p align="center">
+  Powered by Scaffold-ETH 2 • IPFS • Alchemy
+</p>
